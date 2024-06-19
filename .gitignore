@@ -1,0 +1,11 @@
+# Project exclude paths
+/api/target/
+/api/target/scala-2.12/classes/
+/backend/target/
+/backend/target/scala-2.12/classes/
+/dao/target/
+/dao/target/scala-2.12/classes/
+/main/target/
+/main/target/scala-2.12/classes/
+/project/target/
+/target/
