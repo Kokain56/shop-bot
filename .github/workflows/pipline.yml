@@ -1,0 +1,51 @@
+name: CI
+on:
+  pull_request:
+  push:
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            java: 17
+            jobtype: 1
+          - os: ubuntu-latest
+            java: 17
+            jobtype: 2
+          - os: windows-latest
+            java: 17
+            jobtype: 2
+          - os: ubuntu-latest
+            java: 17
+            jobtype: 3
+    runs-on: ${{ matrix.os }}
+    env:
+      # define Java options for both official sbt and sbt-extras
+      JAVA_OPTS: -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+      JVM_OPTS:  -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: sbt
+      - name: Build and test (1)
+        if: ${{ matrix.jobtype == 1 }}
+        shell: bash
+        run: |
+          sbt -v "mimaReportBinaryIssues; scalafmtCheckAll; +test;"
+      - name: Build and test (2)
+        if: ${{ matrix.jobtype == 2 }}
+        shell: bash
+        run: |
+          sbt -v "scripted actions/*"
+      - name: Build and test (3)
+        if: ${{ matrix.jobtype == 3 }}
+        shell: bash
+        run: |
+          sbt -v "dependency-management/*"

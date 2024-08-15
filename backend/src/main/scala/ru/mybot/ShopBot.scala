@@ -19,11 +19,23 @@ class ShopBot(implicit
 
   override def onMessage(msg: Message): IO[Unit] = {
     msg.text match {
-      case Some("/start") => ioGroup(msg)
+      case Some("/start") => ioAdress(msg)
+      case Some(x) => for {
+        state <- dao.readState(msg.chat.id)
+        io <- if (state.equals("-1")) ioGroup(msg) else IO.unit
+      } yield (io)
       case _ => IO.unit
     }
 
   }
+
+  private def ioAdress(msg: Message) = for {
+    _ <- dao.writeState(msg.chat.id, "-1")
+    _ <- sendMessage(
+      chatId = ChatIntId(msg.chat.id),
+      text = "Введите адрес доставки"
+    ).exec
+  } yield ()
 
   private def ioGroup(msg: Message): IO[Unit] = for {
     list <- dao.getProductGroup

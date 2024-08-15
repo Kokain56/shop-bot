@@ -101,7 +101,7 @@ object DaoImpl extends Dao{
     val result = setN.map { x =>
       val v = mapOrder(x)
       s"""update store set count = count - $v  where name = '$x';"""
-    }.reduce((acc, v) => acc + v)
+    }.foldLeft("begin;")((acc, v) => acc + v) + "end;"
     transactor.use(
       Fragment.const(result).update.run.transact(_)
     )
